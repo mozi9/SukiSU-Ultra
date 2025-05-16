@@ -16,6 +16,22 @@
 #define KERNEL_EXEC_TYPE "ksu_exec"
 #define ALL NULL
 
+// Ensure rules are applied when modules are loaded
+static int __init kernelsu_init(void)
+{
+    pr_info("KernelSU module loaded\n");
+    ksu_apply_kernelsu_rules();
+    return 0;
+}
+
+static void reset_avc_cache(void);
+// Resetting the AVC cache in the module unload function
+static void __exit kernelsu_exit(void)
+{
+    reset_avc_cache();  // Clear cache on uninstallation
+    pr_info("KernelSU module unloaded\n");
+}
+
 static struct policydb *get_policydb(void)
 {
 	struct policydb *db;
@@ -123,6 +139,9 @@ void apply_kernelsu_rules()
     ksu_allow(db, "system_server", KERNEL_SU_DOMAIN, "process", "sigkill");
 
 	rcu_read_unlock();
+
+	// reset avc cache table, otherwise the new rules will not take effect if already denied
+	reset_avc_cache();
 }
 
 #define MAX_SEPOL_LEN 128
@@ -195,7 +214,7 @@ static int get_object(char *buf, char __user *user_object, size_t buf_sz,
 }
 
 // reset avc cache table, otherwise the new rules will not take effect if already denied
-static void reset_avc_cache()
+static void reset_avc_cache(void)
 {
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 4, 0))
 	avc_ss_reset(0);
