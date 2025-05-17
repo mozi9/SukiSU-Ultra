@@ -116,6 +116,9 @@ KPM 模板地址: https://github.com/udochina/KPM-Build-Anywhere
 - `kernel` 目录下的文件是 [GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)。
 - 除 `kernel` 目录外，所有其他部分均为 [GPL-3.0 或更高版本](https://www.gnu.org/licenses/gpl-3.0.html)。
 
+## 爱发电链接
+- https://afdian.com/a/shirkneko
+
 ## 赞助名单
 
 - [Ktouls](https://github.com/Ktouls) 非常感谢你给我带来的支持

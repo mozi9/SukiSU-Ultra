@@ -7,6 +7,9 @@ import android.text.TextUtils
 import android.view.Window
 import android.webkit.JavascriptInterface
 import android.widget.Toast
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.dergoogler.mmrl.webui.interfaces.WXOptions
@@ -24,7 +27,6 @@ import com.sukisu.ultra.ui.util.controlKpmModule
 import com.sukisu.ultra.ui.util.listKpmModules
 import java.io.File
 import java.util.concurrent.CompletableFuture
-import androidx.compose.runtime.Composable
 
 class WebViewInterface(
     wxOptions: WXOptions,
@@ -32,15 +34,20 @@ class WebViewInterface(
     override var name: String = "ksu"
 
     companion object {
+        private var isSecondaryScreenState by mutableStateOf(false)
+
         fun factory() = JavaScriptInterface(WebViewInterface::class.java)
+
+        fun updateSecondaryScreenState(isSecondary: Boolean) {
+            isSecondaryScreenState = isSecondary
+        }
     }
 
     private val modDir get() = "/data/adb/modules/${modId.id}"
 
-    @Composable
     @JavascriptInterface
     fun isSecondaryPage(): Boolean {
-        return isSecondaryScreen()
+        return isSecondaryScreenState
     }
 
     @JavascriptInterface

@@ -61,6 +61,12 @@ fun WebUIXTheme(
             ThemeConfig.backgroundImageLoaded = false
         }
     }
+
+    // 更新二级界面状态
+    LaunchedEffect(isSecondaryScreen) {
+        WebViewInterface.updateSecondaryScreenState(isSecondaryScreen)
+    }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) {
@@ -233,14 +239,6 @@ fun WebUIXTheme(
             }
         }
     }
-}
-
-/**
- * 获取当前界面是否为二级界面
- */
-@Composable
-fun isSecondaryScreen(): Boolean {
-    return LocalIsSecondaryScreen.current
 }
 
 /**
