@@ -359,7 +359,6 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
     var isCustomizeExpanded by remember { mutableStateOf(false) }
     var isAppearanceExpanded by remember { mutableStateOf(true) }
     var isAdvancedExpanded by remember { mutableStateOf(false) }
-    var isDpiExpanded by remember { mutableStateOf(false) }
 
     // DPI 设置
     val systemDpi = remember { context.resources.displayMetrics.densityDpi }
@@ -680,6 +679,99 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                             }
                         }
 
+                        // DPI 设置
+                        ListItem(
+                            headlineContent = { Text(stringResource(R.string.app_dpi_title)) },
+                            supportingContent = { Text(stringResource(R.string.app_dpi_summary)) },
+                            leadingContent = {
+                                Icon(
+                                    Icons.Default.AcUnit,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            trailingContent = {
+                                Text(
+                                    text = getDpiFriendlyName(tempDpi),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = Color.Transparent
+                            )
+                        )
+
+                        // DPI 滑动条
+                        Column(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)) {
+                            Slider(
+                                value = tempDpi.toFloat(),
+                                onValueChange = {
+                                    tempDpi = it.toInt()
+                                    isDpiCustom = !dpiPresets.containsValue(tempDpi)
+                                },
+                                valueRange = 160f..600f,
+                                steps = 11,
+                                colors = SliderDefaults.colors(
+                                    thumbColor = MaterialTheme.colorScheme.primary,
+                                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp),
+                            ) {
+                                dpiPresets.forEach { (name, dpi) ->
+                                    TextButton(
+                                        onClick = {
+                                            tempDpi = dpi
+                                            isDpiCustom = false
+                                        },
+                                        modifier = Modifier.weight(1f)
+                                    ) {
+                                        Text(
+                                            text = name,
+                                            color = if (tempDpi == dpi)
+                                                MaterialTheme.colorScheme.primary
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    if (tempDpi != currentDpi) {
+                                        showDpiConfirmDialog = true
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                            ) {
+                                Text(stringResource(R.string.dpi_apply_settings))
+                            }
+
+                            Text(
+                                text = if (isDpiCustom)
+                                    "${stringResource(R.string.dpi_size_custom)}: $tempDpi"
+                                else
+                                    "${getDpiFriendlyName(tempDpi)}: $tempDpi",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 4.dp)
+                            )
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
+
                         // 自定义背景开关
                         ListItem(
                             headlineContent = { Text(stringResource(id = R.string.settings_custom_background)) },
@@ -845,114 +937,6 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                                     )
                                 )
                             }
-                        }
-                    }
-                }
-            }
-
-            // DPI 设置部分
-            SectionHeader(
-                title = stringResource(R.string.dpi_settings),
-                expanded = isDpiExpanded,
-                onToggle = { isDpiExpanded = !isDpiExpanded }
-            )
-
-            AnimatedVisibility(
-                visible = isDpiExpanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(16.dp),
-                    tonalElevation = 1.dp,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    Column {
-                        ListItem(
-                            headlineContent = { Text(stringResource(R.string.app_dpi_title)) },
-                            supportingContent = { Text(stringResource(R.string.app_dpi_summary)) },
-                            leadingContent = {
-                                Icon(
-                                    Icons.Default.AcUnit,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            trailingContent = {
-                                Text(
-                                    text = getDpiFriendlyName(tempDpi),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            },
-                            colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent
-                            )
-                        )
-
-                        // DPI 滑动条
-                        Column(modifier = Modifier.padding(horizontal = 32.dp, vertical = 8.dp)) {
-                            Slider(
-                                value = tempDpi.toFloat(),
-                                onValueChange = {
-                                    tempDpi = it.toInt()
-                                    isDpiCustom = !dpiPresets.containsValue(tempDpi)
-                                },
-                                valueRange = 160f..600f,
-                                steps = 11,
-                                colors = SliderDefaults.colors(
-                                    thumbColor = MaterialTheme.colorScheme.primary,
-                                    activeTrackColor = MaterialTheme.colorScheme.primary,
-                                    inactiveTrackColor = MaterialTheme.colorScheme.surfaceVariant
-                                )
-                            )
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp),
-                            ) {
-                                dpiPresets.forEach { (name, dpi) ->
-                                    TextButton(
-                                        onClick = {
-                                            tempDpi = dpi
-                                            isDpiCustom = false
-                                        },
-                                        modifier = Modifier.weight(1f)
-                                    ) {
-                                        Text(
-                                            text = name,
-                                            color = if (tempDpi == dpi)
-                                                MaterialTheme.colorScheme.primary
-                                            else
-                                                MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
-
-                            TextButton(
-                                onClick = {
-                                    if (tempDpi != currentDpi) {
-                                        showDpiConfirmDialog = true
-                                    }
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                            ) {
-                                Text(stringResource(R.string.dpi_apply_settings))
-                            }
-
-                            Text(
-                                text = if (isDpiCustom)
-                                    "${stringResource(R.string.dpi_size_custom)}: $tempDpi"
-                                else
-                                    "${getDpiFriendlyName(tempDpi)}: $tempDpi",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(top = 4.dp)
-                            )
                         }
                     }
                 }
