@@ -47,6 +47,8 @@ import com.sukisu.ultra.ui.component.KeyEventBlocker
 import com.sukisu.ultra.ui.util.*
 import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.theme.CardConfig
+import com.sukisu.ultra.ui.viewmodel.ModuleViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -109,6 +111,7 @@ fun FlashScreen(navigator: DestinationsNavigator, flashIt: FlashIt) {
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val viewModel: ModuleViewModel = viewModel()
 
     val errorCodeString = stringResource(R.string.error_code)
     val checkLogString = stringResource(R.string.check_log)
@@ -162,6 +165,7 @@ fun FlashScreen(navigator: DestinationsNavigator, flashIt: FlashIt) {
                     }
                 } else {
                     setFlashingStatus(FlashingStatus.SUCCESS)
+                    viewModel.markNeedRefresh()
                 }
                 if (showReboot) {
                     text += "\n\n\n"
@@ -196,6 +200,8 @@ fun FlashScreen(navigator: DestinationsNavigator, flashIt: FlashIt) {
             if (flashIt is FlashIt.FlashBoot) {
                 navigator.popBackStack()
             } else {
+                viewModel.markNeedRefresh()
+                viewModel.fetchModuleList()
                 navigator.navigate(ModuleScreenDestination) {
                 }
             }
@@ -429,7 +435,7 @@ private fun TopBar(
     onSave: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    val cardColor = MaterialTheme.colorScheme.surfaceVariant
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardAlpha = CardConfig.cardAlpha
 
     val statusColor = when(status) {

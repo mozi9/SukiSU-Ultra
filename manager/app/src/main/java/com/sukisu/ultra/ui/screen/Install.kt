@@ -752,7 +752,7 @@ private fun TopBar(
     onLkmUpload: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    val cardColor = MaterialTheme.colorScheme.surfaceVariant
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardAlpha = cardAlpha
 
     TopAppBar(

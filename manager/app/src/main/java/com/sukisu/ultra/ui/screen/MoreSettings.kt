@@ -33,38 +33,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
-import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.Brush
-import androidx.compose.material.icons.filled.ColorLens
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Opacity
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,6 +60,7 @@ import androidx.core.content.edit
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.sukisu.ultra.Natives
 import com.sukisu.ultra.R
 import com.sukisu.ultra.ui.MainActivity
 import com.sukisu.ultra.ui.component.ImageEditorDialog
@@ -506,8 +479,9 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
         )
     }
 
-    val cardColor = MaterialTheme.colorScheme.surfaceVariant
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardAlphaUse = CardConfig.cardAlpha
+    val isDarkTheme = isSystemInDarkTheme()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -641,7 +615,6 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                                     headlineContent = { Text(stringResource(R.string.theme_color)) },
                                     supportingContent = {
                                         val currentThemeName = when (ThemeConfig.currentTheme) {
-                                            is ThemeColors.Default -> stringResource(R.string.color_default)
                                             is ThemeColors.Green -> stringResource(R.string.color_green)
                                             is ThemeColors.Purple -> stringResource(R.string.color_purple)
                                             is ThemeColors.Orange -> stringResource(R.string.color_orange)
@@ -1015,19 +988,21 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                             onHideSusfsStatusChange(it)
                         }
 
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
-                        )
+                        if (Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant
+                            )
 
-                        // 显示KPM开关
-                        SwitchItem(
-                            icon = Icons.Filled.VisibilityOff,
-                            title = stringResource(R.string.show_kpm_info),
-                            summary = stringResource(R.string.show_kpm_info_summary),
-                            checked = isShowKpmInfo
-                        ) {
-                            onShowKpmInfoChange(it)
+                            // 显示KPM开关
+                            SwitchItem(
+                                icon = Icons.Filled.Visibility,
+                                title = stringResource(R.string.show_kpm_info),
+                                summary = stringResource(R.string.show_kpm_info_summary),
+                                checked = isShowKpmInfo
+                            ) {
+                                onShowKpmInfoChange(it)
+                            }
                         }
 
                         HorizontalDivider(
@@ -1108,9 +1083,9 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                         val suSFS = getSuSFS()
                         val isSUS_SU = getSuSFSFeatures()
                         if (suSFS == "Supported" && isSUS_SU == "CONFIG_KSU_SUSFS_SUS_SU") {
-                            // 初始化时，默认启用
+                            // 默认启用
                             var isEnabled by rememberSaveable {
-                                mutableStateOf(true) // 默认启用
+                                mutableStateOf(true)
                             }
 
                             // 在启动时检查状态
@@ -1208,6 +1183,12 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                                             ThemeConfig.forceDarkMode = null
                                             CardConfig.isUserLightModeEnabled = false
                                             CardConfig.isUserDarkModeEnabled = false
+                                            if (!CardConfig.isCustomAlphaSet) {
+                                                CardConfig.cardAlpha = 1f
+                                            }
+                                            if (!CardConfig.isCustomDimSet) {
+                                                CardConfig.cardDim = if (isDarkTheme) 0.5f else 0f
+                                            }
                                             CardConfig.save(context)
                                         }
                                     }
@@ -1285,7 +1266,6 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                                 .fillMaxWidth()
                                 .clickable {
                                     context.saveThemeColors(when (theme) {
-                                        ThemeColors.Default -> "default"
                                         ThemeColors.Green -> "green"
                                         ThemeColors.Purple -> "purple"
                                         ThemeColors.Orange -> "orange"
@@ -1304,11 +1284,12 @@ fun MoreSettingsScreen(navigator: DestinationsNavigator) {
                                 onClick = null
                             )
                             Spacer(modifier = Modifier.width(12.dp))
+                            val isDark = isSystemInDarkTheme()
                             Box(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(theme.Primary)
+                                    .background(if (isDark) theme.primaryDark else theme.primaryLight)
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(name)

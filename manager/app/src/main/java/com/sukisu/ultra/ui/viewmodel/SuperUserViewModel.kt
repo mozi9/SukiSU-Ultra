@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo
 import android.os.Parcelable
 import android.os.SystemClock
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,7 @@ import java.text.Collator
 import java.util.*
 import com.dergoogler.mmrl.platform.Platform
 import com.dergoogler.mmrl.platform.TIMEOUT_MILLIS
+import com.sukisu.ultra.ui.webui.getInstalledPackagesAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -187,15 +189,10 @@ class SuperUserViewModel : ViewModel() {
             val pm = ksuApp.packageManager
             val start = SystemClock.elapsedRealtime()
 
-            val userInfos = Platform.userManager.getUsers()
-            val packages = mutableListOf<PackageInfo>()
-            val packageManager = Platform.packageManager
-
-            for (userInfo in userInfos) {
-                Log.i(TAG, "fetchAppList: ${userInfo.id}")
-                packages.addAll(packageManager.getInstalledPackages(0, userInfo.id))
+            val packages = Platform.getInstalledPackagesAll {
+                Log.e(TAG, "getInstalledPackagesAll:", it)
+                Toast.makeText(ksuApp, "Something went wrong, check logs", Toast.LENGTH_SHORT).show()
             }
-
             apps = packages.map {
                 val appInfo = it.applicationInfo
                 val uid = appInfo!!.uid

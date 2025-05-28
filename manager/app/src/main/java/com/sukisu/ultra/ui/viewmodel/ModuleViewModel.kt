@@ -17,6 +17,8 @@ import org.json.JSONObject
 import java.text.Collator
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import com.dergoogler.mmrl.platform.model.ModuleConfig
+import com.dergoogler.mmrl.platform.model.ModuleConfig.Companion.asModuleConfig
 
 class ModuleViewModel : ViewModel() {
 
@@ -40,6 +42,7 @@ class ModuleViewModel : ViewModel() {
         val hasWebUi: Boolean,
         val hasActionScript: Boolean,
         val dirId: String, // real module id (dir name)
+        val config: ModuleConfig,
     )
 
     var isRefreshing by mutableStateOf(false)
@@ -87,13 +90,15 @@ class ModuleViewModel : ViewModel() {
                     .asSequence()
                     .map { array.getJSONObject(it) }
                     .map { obj ->
+                        val id = obj.getString("id")
+                        val config = id.asModuleConfig
                         ModuleInfo(
-                            obj.getString("id"),
-                            obj.optString("name"),
+                            id,
+                            config.name ?: obj.optString("name"),
                             obj.optString("author", "Unknown"),
                             obj.optString("version", "Unknown"),
                             obj.optInt("versionCode", 0),
-                            obj.optString("description"),
+                            config.description ?: obj.optString("description"),
                             obj.getBoolean("enabled"),
                             obj.getBoolean("update"),
                             obj.getBoolean("remove"),
@@ -101,6 +106,7 @@ class ModuleViewModel : ViewModel() {
                             obj.optBoolean("web"),
                             obj.optBoolean("action"),
                             obj.getString("dir_id"),
+                            config
                         )
                     }.toList()
                 isNeedRefresh = false

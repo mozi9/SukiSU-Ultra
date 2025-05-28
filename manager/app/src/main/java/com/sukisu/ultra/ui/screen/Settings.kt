@@ -648,11 +648,6 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
         }
 
         var selectedOption by remember { mutableStateOf<UninstallType?>(null) }
-        val cardColor = if (!ThemeConfig.useDynamicColor) {
-            ThemeConfig.currentTheme.ButtonContrast
-        } else {
-            MaterialTheme.colorScheme.surfaceContainerHigh
-        }
 
         AlertDialog(
             onDismissRequest = {
@@ -781,7 +776,7 @@ fun rememberUninstallDialog(onSelected: (UninstallType) -> Unit): DialogHandle {
                     )
                 }
             },
-            containerColor = cardColor,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
             shape = MaterialTheme.shapes.extraLarge,
             tonalElevation = 4.dp
         )
@@ -794,7 +789,7 @@ private fun TopBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val systemIsDark = isSystemInDarkTheme()
-    val cardColor = MaterialTheme.colorScheme.surfaceVariant
+    val cardColor = MaterialTheme.colorScheme.surfaceContainerLow
     val cardAlpha = if (ThemeConfig.customBackgroundUri != null) {
         cardAlpha
     } else {
