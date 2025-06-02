@@ -10,19 +10,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object CardConfig {
-    val settingElevation: Dp = 4.dp
-    val customBackgroundElevation: Dp = 0.dp
-
     // 卡片透明度
     var cardAlpha by mutableFloatStateOf(1f)
     // 卡片亮度
     var cardDim by mutableFloatStateOf(0f)
     // 卡片阴影
-    var cardElevation by mutableStateOf(settingElevation)
+    var cardElevation by mutableStateOf(4.dp)
     var isShadowEnabled by mutableStateOf(true)
     var isCustomAlphaSet by mutableStateOf(false)
     var isCustomDimSet by mutableStateOf(false)
@@ -69,37 +65,24 @@ object CardConfig {
      */
     fun updateShadowEnabled(enabled: Boolean) {
         isShadowEnabled = enabled
-        cardElevation = if (isCustomBackgroundEnabled && cardAlpha != 1f) {
-            customBackgroundElevation
+        cardElevation = if (isCustomBackgroundEnabled) {
+            0.dp
         } else if (enabled) {
-            settingElevation
+            4.dp
         } else {
-            customBackgroundElevation
+            0.dp
         }
     }
 
     /**
-     * 设置深色模式默认值
+     * 设置主题模式默认值
      */
-    fun setDarkModeDefaults() {
-        if (!isCustomAlphaSet) {
-            cardAlpha = 0.70f
-        }
-        if (!isCustomDimSet) {
-            cardDim = 0.5f
-        }
-        updateShadowEnabled(isShadowEnabled)
-    }
-
-    /**
-     * 设置浅色模式默认值
-     */
-    fun setLightModeDefaults() {
+    fun setThemeDefaults(isDarkMode: Boolean) {
         if (!isCustomAlphaSet) {
             cardAlpha = 1f
         }
         if (!isCustomDimSet) {
-            cardDim = 0f
+            cardDim = if (isDarkMode) 0.5f else 0f
         }
         updateShadowEnabled(isShadowEnabled)
     }
@@ -112,6 +95,19 @@ object CardConfig {
 fun getCardColors(originalColor: Color) = CardDefaults.cardColors(
     containerColor = originalColor.copy(alpha = CardConfig.cardAlpha),
     contentColor = determineContentColor(originalColor)
+)
+
+/**
+ * 获取卡片阴影配置
+ */
+@Composable
+fun getCardElevation() = CardDefaults.cardElevation(
+    defaultElevation = CardConfig.cardElevation,
+    pressedElevation = if (CardConfig.isCustomBackgroundEnabled) 0.dp else 8.dp,
+    focusedElevation = if (CardConfig.isCustomBackgroundEnabled) 0.dp else 6.dp,
+    hoveredElevation = if (CardConfig.isCustomBackgroundEnabled) 0.dp else 4.dp,
+    draggedElevation = if (CardConfig.isCustomBackgroundEnabled) 0.dp else 8.dp,
+    disabledElevation = 0.dp
 )
 
 /**

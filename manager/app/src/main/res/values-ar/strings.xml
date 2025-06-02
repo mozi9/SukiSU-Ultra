@@ -298,7 +298,7 @@
     <string name="flash_failed_message">فشل التركيب</string>
     <!-- lkm/gki install -->
     <string name="Lkm_install_methods">إصلاح/تثبيت LKM</string>
-    <string name="GKI_install_methods">GKI/non-GKI installation</string>
+    <string name="GKI_install_methods">Flashing AnyKernel3</string>
     <string name="kernel_version_log">إصدار النواة：%1$s</string>
     <string name="tool_version_log">استخدام أداة التصحيح：%1$s</string>
     <string name="configuration">تعيين</string>
@@ -328,8 +328,10 @@
     <string name="show_kpm_info">عرض وظيفة KPM</string>
     <string name="show_kpm_info_summary">عرض معلومات KPM ووظيفتها في الشريط المنزلي والأسفل (تحتاج إلى إعادة فتح التطبيق)</string>
     <!-- Webui X settings -->
-    <string name="use_webuix">استخدام WebUI X</string>
-    <string name="use_webuix_summary">استخدم WebUI X بدلاً من WebUI ، الذي يدعم المزيد من API. كن على علم بأن المطورين يمكنهم تجاوز هذه الميزة في تكوين وحدتهم.</string>
+    <string name="use_webuix">Select the WebUI engine to use</string>
+    <string name="engine_auto_select">Automatic Selection</string>
+    <string name="engine_force_webuix">Force the use of WebUI X</string>
+    <string name="engine_force_ksu">Mandatory use of KSU WebUI</string>
     <string name="use_webuix_eruda">حقن Eruda في WebUI X</string>
     <string name="use_webuix_eruda_summary">حقن وحدة التصحيح في WebUI X لجعل تصحيح الأخطاء أسهل. يتطلب تصحيح أخطاء الويب لتكون قيد التشغيل.</string>
     <!-- DPI setting related strings -->
@@ -367,4 +369,5 @@
     <string name="installing_module">تم تثبيت الوحدة %1$d/%2$d</string>
     <string name="module_failed_count">أخفق %d في تثبيت وحدة جديدة</string>
     <string name="module_download_error">فشل تحميل الوحدة</string>
+    <string name="kernel_flashing">Kernel Flashing</string>
 </resources>
