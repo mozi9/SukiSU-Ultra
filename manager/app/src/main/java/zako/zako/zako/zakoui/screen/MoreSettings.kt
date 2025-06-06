@@ -1,11 +1,9 @@
-package com.sukisu.ultra.ui.screen
+package zako.zako.zako.zakoui.screen
 
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.ComponentName
-import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -77,9 +75,11 @@ import kotlin.math.roundToInt
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -88,6 +88,9 @@ import com.sukisu.ultra.ui.theme.getCardElevation
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.unit.sp
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.sukisu.ultra.ksuApp
 
 /**
  * @author ShirkNeko
@@ -104,29 +107,15 @@ fun saveCardConfig(context: Context) {
 }
 
 /**
- * 切换启动器图标
- */
-fun toggleLauncherIcon(context: Context, useAlt: Boolean) {
-    val pm = context.packageManager
-    val main = ComponentName(context, MainActivity::class.java.name)
-    val alt = ComponentName(context, "${MainActivity::class.java.name}Alias")
-    if (useAlt) {
-        pm.setComponentEnabledSetting(main, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
-        pm.setComponentEnabledSetting(alt, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-    } else {
-        pm.setComponentEnabledSetting(alt, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
-        pm.setComponentEnabledSetting(main, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
-    }
-}
-
-/**
  * 更多设置屏幕
  */
 @SuppressLint("LocalContextConfigurationRead", "ObsoleteSdkInt")
 @OptIn(ExperimentalMaterial3Api::class)
 @Destination<RootGraph>
 @Composable
-fun MoreSettingsScreen() {
+fun MoreSettingsScreen(
+    navigator: DestinationsNavigator
+) {
     // 顶部滚动行为
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val context = LocalContext.current
@@ -232,7 +221,7 @@ fun MoreSettingsScreen() {
 
     // 显示KPM开关状态
     var isShowKpmInfo by remember {
-        mutableStateOf(prefs.getBoolean("show_kpm_info", true))
+        mutableStateOf(prefs.getBoolean("show_kpm_info", false))
     }
 
     // 隐藏SuSFS状态开关状态
@@ -400,14 +389,7 @@ fun MoreSettingsScreen() {
                 @Suppress("DEPRECATION")
                 context.resources.updateConfiguration(config, context.resources.displayMetrics)
             }
-
-            val intent = Intent(context, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-
-            if (context is Activity) {
-                context.finish()
-            }
+            ksuApp.refreshCurrentActivity()
         }
     }
 
@@ -648,6 +630,16 @@ fun MoreSettingsScreen() {
                         text = stringResource(R.string.more_settings),
                         style = MaterialTheme.typography.titleLarge
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navigator.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.back)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = CardConfig.cardAlpha),
@@ -1071,9 +1063,9 @@ fun MoreSettingsScreen() {
                 )
 
                 if (Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
-                    // 显示KPM开关
+                    // 隐藏KPM开关
                     SwitchSettingItem(
-                        icon = Icons.Filled.Visibility,
+                        icon = Icons.Filled.VisibilityOff,
                         title = stringResource(R.string.show_kpm_info),
                         summary = stringResource(R.string.show_kpm_info_summary),
                         checked = isShowKpmInfo,
@@ -1245,10 +1237,10 @@ fun SettingItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (subtitle != null) SETTINGS_ITEM_HEIGHT + 12.dp else SETTINGS_ITEM_HEIGHT)
+//            .height(if (subtitle != null) SETTINGS_ITEM_HEIGHT + 12.dp else SETTINGS_ITEM_HEIGHT)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = icon,
@@ -1296,10 +1288,10 @@ fun SwitchSettingItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(if (summary != null) SETTINGS_ITEM_HEIGHT + 12.dp else SETTINGS_ITEM_HEIGHT)
+//            .height(if (summary != null) SETTINGS_ITEM_HEIGHT + 12.dp else SETTINGS_ITEM_HEIGHT)
             .clickable { onChange(!checked) }
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.Top
     ) {
         Icon(
             imageVector = icon,
@@ -1317,8 +1309,9 @@ fun SwitchSettingItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                lineHeight = 20.sp,
+//                maxLines = 1,
+//                overflow = TextOverflow.Ellipsis
             )
             if (summary != null) {
                 Spacer(modifier = Modifier.height(2.dp))
@@ -1326,8 +1319,9 @@ fun SwitchSettingItem(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    lineHeight = 16.sp,
+//                    maxLines = 2,
+//                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

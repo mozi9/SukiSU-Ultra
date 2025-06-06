@@ -25,7 +25,7 @@ curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kern
 
 ## 統合された susfs の使い方
 
-1. パッチを当てずに susfs-dev ブランチを直接使用してください。
+1. パッチを当てずに susfs-dev ブランチを直接使用してください (非GKIデバイスビルドをサポート)
 ```
 curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
 ```
@@ -108,6 +108,10 @@ https://kernelsu.org/zh_CN/guide/installation.html をご参照ください。
 5. その他のカスタマイズ
 6. KPM カーネルモジュールに対応
 
+## トラブルシューティング
+
+1.KernelSU Managerのアンインストールができない。 →パッケージ名com.sony.playmemories.mobile.KernelSU Managerのアプリケーションをアンインストールする。
+
 ## ライセンス
 
 - `kernel` ディレクトリ以下のファイルは[GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)です。
@@ -121,8 +125,6 @@ https://kernelsu.org/zh_CN/guide/installation.html をご参照ください。
 - [wswzgdg](https://github.com/wswzgdg) このプロジェクトを支援していただき、ありがとうございます。
 - [yspbwx2010](https://github.com/yspbwx2010) どうもありがとう。
 - [DARKWWEE](https://github.com/DARKWWEE) ラオウ100USDTありがとう！
-
-上記の一覧にあなたの名前がない場合は、できるだけ早急に更新しますので再度ご支援をお願いします。
 
 ## 貢献者
 

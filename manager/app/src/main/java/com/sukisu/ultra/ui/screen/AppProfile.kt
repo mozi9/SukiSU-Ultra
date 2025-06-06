@@ -288,6 +288,7 @@ private fun AppProfileInner(
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             shape = MaterialTheme.shapes.medium,
                             colors = cardColors,
+                            elevation = getCardElevation(),
                         ) {
                             ProfileBox(mode, true) {
                                 // template mode shouldn't change profile here!

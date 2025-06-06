@@ -33,15 +33,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Security
-import androidx.compose.material.icons.filled.SettingsSuggest
-import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material.icons.outlined.Warning
@@ -96,10 +88,6 @@ import com.sukisu.ultra.ui.theme.CardConfig.cardElevation
 import com.sukisu.ultra.ui.theme.getCardColors
 import com.sukisu.ultra.ui.theme.getCardElevation
 import com.sukisu.ultra.ui.util.checkNewVersion
-import com.sukisu.ultra.ui.util.getKpmModuleCount
-import com.sukisu.ultra.ui.util.getKpmVersion
-import com.sukisu.ultra.ui.util.getModuleCount
-import com.sukisu.ultra.ui.util.getSuperuserCount
 import com.sukisu.ultra.ui.util.module.LatestVersionInfo
 import com.sukisu.ultra.ui.util.reboot
 import com.sukisu.ultra.ui.viewmodel.HomeViewModel
@@ -138,8 +126,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
     Scaffold(
         topBar = {
             TopBar(
-                kernelVersion = viewModel.systemStatus.kernelVersion,
-                onInstallClick = { navigator.navigate(InstallScreenDestination) },
                 scrollBehavior = scrollBehavior
             )
         },
@@ -200,8 +186,6 @@ fun HomeScreen(navigator: DestinationsNavigator) {
                 InfoCard(
                     systemInfo = viewModel.systemInfo,
                     isSimpleMode = viewModel.isSimpleMode,
-                    isHideVersion = viewModel.isHideVersion,
-                    isHideOtherInfo = viewModel.isHideOtherInfo,
                     isHideSusfsStatus = viewModel.isHideSusfsStatus,
                     showKpmInfo = viewModel.showKpmInfo,
                     lkmMode = viewModel.systemStatus.lkmMode,
@@ -279,8 +263,6 @@ fun RebootDropdownItem(@StringRes id: Int, reason: String = "") {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBar(
-    kernelVersion: KernelVersion,
-    onInstallClick: () -> Unit,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -308,7 +290,7 @@ private fun TopBar(
                     showDropdown = true
                 }) {
                     Icon(
-                        imageVector = Icons.Filled.Refresh,
+                        imageVector = Icons.Filled.PowerSettingsNew,
                         contentDescription = stringResource(id = R.string.reboot)
                     )
 
@@ -366,8 +348,8 @@ private fun StatusCard(
 
                     val workingModeSurfaceText = when {
                         systemStatus.lkmMode == true -> "LKM"
-                        systemStatus.lkmMode == null && systemStatus.kernelVersion.isGKI1() -> "GKI-1.0"
-                        systemStatus.lkmMode == false || systemStatus.kernelVersion.isGKI() -> "GKI-2.0"
+                        systemStatus.lkmMode == null && systemStatus.kernelVersion.isGKI1() -> "GKI 1.0"
+                        systemStatus.lkmMode == false || systemStatus.kernelVersion.isGKI() -> "GKI 2.0"
                         else -> "N-GKI"
                     }
 
@@ -375,7 +357,11 @@ private fun StatusCard(
                         Icons.Outlined.TaskAlt,
                         contentDescription = stringResource(R.string.home_working),
                         tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(
+                                horizontal = 4.dp
+                            ),
                     )
 
                     Column(Modifier.padding(start = 20.dp)) {
@@ -386,6 +372,7 @@ private fun StatusCard(
                             Text(
                                 text = workingModeText,
                                 style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.primary,
                             )
 
                             Spacer(Modifier.width(8.dp))
@@ -399,7 +386,8 @@ private fun StatusCard(
                                 Text(
                                     text = workingModeSurfaceText,
                                     style = MaterialTheme.typography.labelMedium,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    color = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
 
@@ -418,7 +406,8 @@ private fun StatusCard(
                                         modifier = Modifier.padding(
                                             horizontal = 6.dp,
                                             vertical = 2.dp
-                                        )
+                                        ),
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
                             }
@@ -427,41 +416,13 @@ private fun StatusCard(
                         val isHideVersion = LocalContext.current.getSharedPreferences("settings", Context.MODE_PRIVATE)
                             .getBoolean("is_hide_version", false)
 
-                        val isHideOtherInfo = LocalContext.current.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                            .getBoolean("is_hide_other_info", false)
-
-                        val showKpmInfo = LocalContext.current.getSharedPreferences("settings", Context.MODE_PRIVATE)
-                            .getBoolean("show_kpm_info", true)
-
                         if (!isHideVersion) {
                             Spacer(Modifier.height(4.dp))
                             Text(
                                 text = stringResource(R.string.home_working_version, systemStatus.ksuVersion),
                                 style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.secondary,
                             )
-                        }
-
-                        if (!isHideOtherInfo) {
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.home_superuser_count, getSuperuserCount()),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.home_module_count, getModuleCount()),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-
-                            val kpmVersion = getKpmVersion()
-                            if (kpmVersion.isNotEmpty() && !kpmVersion.startsWith("Error") && showKpmInfo && Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = stringResource(R.string.home_kpm_module, getKpmModuleCount()),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                            }
                         }
                     }
                 }
@@ -471,19 +432,25 @@ private fun StatusCard(
                         Icons.Outlined.Warning,
                         contentDescription = stringResource(R.string.home_not_installed),
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(
+                                horizontal = 4.dp
+                            ),
                     )
 
                     Column(Modifier.padding(start = 20.dp)) {
                         Text(
                             text = stringResource(R.string.home_not_installed),
                             style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.error
                         )
 
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.home_click_to_install),
                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                 }
@@ -493,19 +460,25 @@ private fun StatusCard(
                         Icons.Outlined.Block,
                         contentDescription = stringResource(R.string.home_unsupported),
                         tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier
+                            .size(28.dp)
+                            .padding(
+                                horizontal = 4.dp
+                            ),
                     )
 
                     Column(Modifier.padding(start = 20.dp)) {
                         Text(
                             text = stringResource(R.string.home_unsupported),
                             style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.error
                         )
 
                         Spacer(Modifier.height(4.dp))
                         Text(
                             text = stringResource(R.string.home_unsupported_reason),
                             style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
                         )
                     }
                 }
@@ -645,8 +618,6 @@ fun DonateCard() {
 private fun InfoCard(
     systemInfo: HomeViewModel.SystemInfo,
     isSimpleMode: Boolean,
-    isHideVersion: Boolean,
-    isHideOtherInfo: Boolean,
     isHideSusfsStatus: Boolean,
     showKpmInfo: Boolean,
     lkmMode: Boolean?
@@ -664,20 +635,23 @@ private fun InfoCard(
             fun InfoCardItem(
                 label: String,
                 content: String,
-                icon: ImageVector = Icons.Default.Info
+                icon: ImageVector? = null,
             ) {
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                    verticalAlignment = Alignment.Top,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+                    if (icon != null) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = label,
+                            modifier = Modifier
+                                .size(28.dp)
+                                .padding(vertical = 4.dp),
+                        )
+                    }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(
                         modifier = Modifier
@@ -730,26 +704,24 @@ private fun InfoCard(
             )
 
             if (!isSimpleMode) {
-                if (lkmMode != true) {
-                    // 根据showKpmInfo决定是否显示KPM信息
-                    if (showKpmInfo && Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
-                        val displayVersion = if (systemInfo.kpmVersion.isEmpty() || systemInfo.kpmVersion.startsWith("Error")) {
-                            val statusText = if (Natives.isKPMEnabled()) {
-                                stringResource(R.string.kernel_patched)
-                            } else {
-                                stringResource(R.string.kernel_not_enabled)
-                            }
-                            "${stringResource(R.string.not_supported)} ($statusText)"
+                // 根据showKpmInfo决定是否显示KPM信息
+                if (lkmMode != true && !showKpmInfo && Natives.version >= Natives.MINIMAL_SUPPORTED_KPM) {
+                    val displayVersion = if (systemInfo.kpmVersion.isEmpty() || systemInfo.kpmVersion.startsWith("Error")) {
+                        val statusText = if (Natives.isKPMEnabled()) {
+                            stringResource(R.string.kernel_patched)
                         } else {
-                            "${stringResource(R.string.supported)} (${systemInfo.kpmVersion})"
+                            stringResource(R.string.kernel_not_enabled)
                         }
-
-                        InfoCardItem(
-                            stringResource(R.string.home_kpm_version),
-                            displayVersion,
-                            icon = Icons.Default.Archive
-                        )
+                        "${stringResource(R.string.not_supported)} ($statusText)"
+                    } else {
+                        "${stringResource(R.string.supported)} (${systemInfo.kpmVersion})"
                     }
+
+                    InfoCardItem(
+                        stringResource(R.string.home_kpm_version),
+                        displayVersion,
+                        icon = Icons.Default.Archive
+                    )
                 }
             }
 

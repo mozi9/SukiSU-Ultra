@@ -193,21 +193,6 @@ fun InstallScreen(navigator: DestinationsNavigator) {
         }
     }
 
-    val selectLkmLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri ->
-                lkmSelection = LkmSelection.LkmUri(uri)
-            }
-        }
-    }
-
-    val onLkmUpload = {
-        selectLkmLauncher.launch(Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "application/octet-stream"
-        })
-    }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -215,7 +200,6 @@ fun InstallScreen(navigator: DestinationsNavigator) {
         topBar = {
             TopBar(
                 onBack = { navigator.popBackStack() },
-                onLkmUpload = onLkmUpload,
                 scrollBehavior = scrollBehavior
             )
         },
@@ -232,7 +216,6 @@ fun InstallScreen(navigator: DestinationsNavigator) {
         ) {
             SelectInstallMethod(
                 isGKI = isGKI,
-                isAbDevice = isAbDevice,
                 onSelected = { method ->
                     if (method is InstallMethod.HorizonKernel && method.uri != null) {
                         if (isAbDevice) {
@@ -383,7 +366,6 @@ sealed class InstallMethod {
 @Composable
 private fun SelectInstallMethod(
     isGKI: Boolean = false,
-    isAbDevice: Boolean = false,
     onSelected: (InstallMethod) -> Unit = {}
 ) {
     val rootAvailable = rootAvailable()
@@ -470,8 +452,8 @@ private fun SelectInstallMethod(
         }
     }
 
-    var LKMExpanded by remember { mutableStateOf(false) }
-    var GKIExpanded by remember { mutableStateOf(false) }
+    var lkmExpanded by remember { mutableStateOf(false) }
+    var gkiExpanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
@@ -483,17 +465,12 @@ private fun SelectInstallMethod(
                 elevation = getCardElevation(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 16.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .shadow(
-                        elevation = cardElevation,
-                        shape = MaterialTheme.shapes.large,
-                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    )
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHigh
+                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     ListItem(
@@ -511,13 +488,13 @@ private fun SelectInstallMethod(
                             )
                         },
                         modifier = Modifier.clickable {
-                            LKMExpanded = !LKMExpanded
+                            lkmExpanded = !lkmExpanded
                         }
                     )
                 }
 
                 AnimatedVisibility(
-                    visible = LKMExpanded,
+                    visible = lkmExpanded,
                     enter = fadeIn() + expandVertically(),
                     exit = shrinkVertically() + fadeOut()
                 ) {
@@ -597,15 +574,10 @@ private fun SelectInstallMethod(
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
                     .clip(MaterialTheme.shapes.large)
-                    .shadow(
-                        elevation = cardElevation,
-                        shape = MaterialTheme.shapes.large,
-                        spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                    )
             ) {
                 MaterialTheme(
                     colorScheme = MaterialTheme.colorScheme.copy(
-                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHigh
+                        surface = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     ListItem(
@@ -623,13 +595,13 @@ private fun SelectInstallMethod(
                             )
                         },
                         modifier = Modifier.clickable {
-                            GKIExpanded = !GKIExpanded
+                            gkiExpanded = !gkiExpanded
                         }
                     )
                 }
 
                 AnimatedVisibility(
-                    visible = GKIExpanded,
+                    visible = gkiExpanded,
                     enter = fadeIn() + expandVertically(),
                     exit = shrinkVertically() + fadeOut()
                 ) {
@@ -716,7 +688,7 @@ fun rememberSelectKmiDialog(onSelected: (String?) -> Unit): DialogHandle {
         }
 
         var selection by remember { mutableStateOf<String?>(null) }
-        val backgroundColor = if (CardConfig.isCustomBackgroundEnabled) Color.Transparent else MaterialTheme.colorScheme.surfaceContainerHigh
+        val backgroundColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
         MaterialTheme(
             colorScheme = MaterialTheme.colorScheme.copy(
@@ -743,7 +715,6 @@ fun rememberSelectKmiDialog(onSelected: (String?) -> Unit): DialogHandle {
 @Composable
 private fun TopBar(
     onBack: () -> Unit = {},
-    onLkmUpload: () -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     val colorScheme = MaterialTheme.colorScheme

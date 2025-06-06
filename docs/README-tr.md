@@ -136,8 +136,6 @@ Lütfen **tümünü** https://kernelsu.org/zh_CN/guide/installation.html adresin
 - [yspbwx2010](https://github.com/yspbwx2010) Çok teşekkür ederim
 - [DARKWWEE](https://github.com/DARKWWEE) 100 USDT için teşekkürler
 
-Eğer yukarıdaki listede adınız yoksa, zamanında güncelleyeceğim, herkese tekrar teşekkür ederim
-
 ## Katkıda Bulunanlar
 
 - [KernelSU](https://github.com/tiann/KernelSU): Orijinal proje

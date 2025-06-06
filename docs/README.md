@@ -28,7 +28,7 @@ curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kern
 
 ## 如何集成 susfs
 
-1. 直接使用 susfs-stable 或者 susfs-dev 分支，不需要再集成 susfs
+1. 直接使用 susfs-stable 或者 susfs-dev 分支，不需要再集成 susfs (支持非 GKI 设备构建)
 
 ```
 curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
@@ -120,6 +120,9 @@ KPM 模板地址: https://github.com/udochina/KPM-Build-Anywhere
 5. 更多自定义功能
 6. 对 KPM 内核模块的支持
 
+## 疑难解答
+1. 卸载 KernelSU 管理器设备卡死。→ 卸载包名为 com.sony.playmemories.mobile 的应用。
+
 ## 许可证
 
 - `kernel` 目录下的文件是 [GPL-2.0-only](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)。
@@ -137,8 +140,6 @@ KPM 模板地址: https://github.com/udochina/KPM-Build-Anywhere
 - [wswzgdg](https://github.com/wswzgdg) 非常感谢对此项目的支持
 - [yspbwx2010](https://github.com/yspbwx2010) 非常感谢
 - [DARKWWEE](https://github.com/DARKWWEE) 感谢老哥的 100 USDT
-
-如果以上名单没有你的名称，我会及时更新，再次感谢大家的支持
 
 ## 贡献
 
