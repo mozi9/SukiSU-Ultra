@@ -416,6 +416,7 @@ void ksu_track_throne()
 		if (ksu_is_manager_uid_valid()) {
 			pr_info("manager is uninstalled, invalidate it!\n");
 			ksu_invalidate_manager_uid();
+			goto prune;
 		}
 		
 		pr_info("Searching manager...\n");
@@ -428,7 +429,8 @@ void ksu_track_throne()
 		pr_info("Manager search completed\n");
 	}
 	
-	// Always prune the allowlist
+prune:
+	// then prune the allowlist
 	ksu_prune_allowlist(is_uid_exist, &uid_list);
 	
 out:
