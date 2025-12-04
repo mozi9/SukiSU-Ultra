@@ -269,8 +269,10 @@ out:
 
 	if (persist) {
 		persistent_allow_list();
+#if !defined(CONFIG_KSU_SUSFS) && !defined(CONFIG_KSU_MANUAL_HOOK)
 		// FIXME: use a new flag
 		ksu_mark_running_process();
+#endif
 	}
 
 	return result;

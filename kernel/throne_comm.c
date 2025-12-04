@@ -121,7 +121,11 @@ bool ksu_throne_comm_load_state(void)
 		goto put_task;
 	}
 	cb->func = do_load_throne_state;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	task_work_add(tsk, cb, TWA_RESUME);
+#else
+	task_work_add(tsk, cb, true);
+#endif
 
 put_task:
 	put_task_struct(tsk);
@@ -145,7 +149,11 @@ void ksu_throne_comm_save_state(void)
 		goto put_task;
 	}
 	cb->func = do_save_throne_state;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	task_work_add(tsk, cb, TWA_RESUME);
+#else
+	task_work_add(tsk, cb, true);
+#endif
 
 put_task:
 	put_task_struct(tsk);
@@ -265,7 +273,11 @@ void ksu_uid_exit(void)
 		goto put_task;
 	}
 	cb->func = do_save_throne_state;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 0)
 	task_work_add(tsk, cb, TWA_RESUME);
+#else
+	task_work_add(tsk, cb, true);
+#endif
 
 put_task:
 	put_task_struct(tsk);
