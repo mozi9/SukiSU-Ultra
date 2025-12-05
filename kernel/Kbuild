@@ -4,7 +4,7 @@ kernelsu-objs += dynamic_manager.o
 kernelsu-objs += app_profile.o
 kernelsu-objs += apk_sign.o
 kernelsu-objs += sucompat.o
-ifeq ($(CONFIG_KSU_SUSFS), y)
+ifneq ($(CONFIG_KSU_SUSFS), y)
 kernelsu-objs += syscall_hook_manager.o
 endif
 kernelsu-objs += throne_tracker.o

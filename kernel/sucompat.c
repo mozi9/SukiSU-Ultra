@@ -21,7 +21,9 @@
 #endif
 
 #ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs_def.h>
 #include <linux/namei.h>
+#include "selinux/selinux.h"
 #include "objsec.h"
 #endif // #ifdef CONFIG_KSU_SUSFS
 
@@ -91,6 +93,22 @@ static const char sh_path[] = SH_PATH;
 static const char su_path[] = SU_PATH;
 static const char ksud_path[] = KSUD_PATH;
 
+extern bool ksu_kernel_umount_enabled;
+
+int ksu_handle_execveat_init(struct filename *filename) {
+    if (current->pid != 1 && is_init(get_current_cred())) {
+        if (unlikely(strcmp(filename->name, KSUD_PATH) == 0)) {
+            pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
+            escape_to_root_for_init();
+        } else if (likely(strstr(filename->name, "/app_process") == NULL && strstr(filename->name, "/adbd") == NULL)) {
+            pr_info("hook_manager: unmark %d exec %s\n", current->pid, filename->name);
+            susfs_set_current_proc_umounted();
+        }
+        return 0;
+    }
+    return 1;
+}
+
 // the call from execve_handler_pre won't provided correct value for __never_use_argument, use them after fix execve_handler_pre, keeping them for consistence for manually patched code
 int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 				 void *__never_use_argv, void *__never_use_envp,
@@ -113,6 +131,10 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 	if (IS_ERR(filename)) {
 		return 0;
 	}
+
+	if (!ksu_handle_execveat_init(filename)) {
+        return 0;
+    }
 
 	if (likely(memcmp(filename->name, su_path, sizeof(su_path))))
 		return 0;

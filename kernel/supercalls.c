@@ -41,7 +41,7 @@
 #endif
 
 #ifdef CONFIG_KSU_SUSFS
-bool susfs_is_boot_completed_triggered = false;
+bool susfs_is_boot_completed_triggered __read_mostly = false;
 #endif // #ifdef CONFIG_KSU_SUSFS
 
 bool ksu_uid_scanner_enabled = false;

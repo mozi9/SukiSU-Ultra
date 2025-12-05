@@ -198,9 +198,6 @@ u32 ksu_get_ksu_file_sid()
 #define KERNEL_INIT_DOMAIN "u:r:init:s0"
 #define KERNEL_ZYGOTE_DOMAIN "u:r:zygote:s0"
 #define KERNEL_PRIV_APP_DOMAIN "u:r:priv_app:s0:c512,c768"
-#ifndef KERNEL_SU_DOMAIN
-#define KERNEL_SU_DOMAIN "u:r:su:s0"
-#endif // #ifndef KERNEL_SU_DOMAIN
 u32 susfs_ksu_sid = 0;
 u32 susfs_init_sid = 0;
 u32 susfs_zygote_sid = 0;
@@ -265,7 +262,7 @@ bool susfs_is_current_zygote_domain(void) {
 
 void susfs_set_ksu_sid(void)
 {
-	susfs_set_sid(KERNEL_SU_DOMAIN, &susfs_ksu_sid);
+	susfs_set_sid(KERNEL_SU_CONTEXT, &susfs_ksu_sid);
 }
 
 bool susfs_is_current_ksu_domain(void) {
