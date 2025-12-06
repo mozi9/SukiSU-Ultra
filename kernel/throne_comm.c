@@ -6,6 +6,7 @@
 #include <linux/workqueue.h>
 #include <linux/task_work.h>
 #include <linux/sched.h>
+#include <linux/sched/task.h>
 #include <linux/pid.h>
 #include <linux/version.h>
 
