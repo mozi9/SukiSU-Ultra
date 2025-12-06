@@ -8,6 +8,7 @@
 #include <linux/task_work.h>
 #include <linux/sched.h>
 #include <linux/pid.h>
+#include <linux/sched/task.h>
 #ifdef CONFIG_KSU_DEBUG
 #include <linux/moduleparam.h>
 #endif
