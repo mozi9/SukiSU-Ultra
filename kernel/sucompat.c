@@ -107,12 +107,13 @@ int ksu_handle_execveat_init(struct filename **filename_ptr) {
             pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
             escape_to_root_for_init();
         } 
-#ifdef CONFIG_KSU_SUSFS
 		else if (likely(strstr(filename->name, "/app_process") == NULL && strstr(filename->name, "/adbd") == NULL)) {
             pr_info("hook_manager: unmark %d exec %s\n", current->pid, filename->name);
+#ifdef CONFIG_KSU_SUSFS
             susfs_set_current_proc_umounted();
-        }
 #endif
+			return 1;
+        }
         return 0;
     }
     return 1;
@@ -157,16 +158,25 @@ int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr,
 	return 0;
 }
 
+#if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
+extern bool ksu_execveat_hook __read_mostly;
+#endif
 int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
 			void *envp, int *flags)
 {
-	if (!ksu_handle_execveat_init(filename_ptr)) {
-        return 0;
-    }
-	
-	if (ksu_handle_execveat_ksud(fd, filename_ptr, argv, envp, flags)) {
-		return 0;
+#if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
+	if (unlikely(ksu_execveat_hook)) {
+#endif
+		if (!ksu_handle_execveat_init(filename_ptr)) {
+			return 0;
+		}
+
+		if (ksu_handle_execveat_ksud(fd, filename_ptr, argv, envp, flags)) {
+			return 0;
+		}
+#if defined(CONFIG_KSU_SUSFS) || defined(CONFIG_KSU_MANUAL_HOOK)
 	}
+#endif
 
 	return ksu_handle_execveat_sucompat(fd, filename_ptr, argv, envp,
 						flags);
@@ -214,6 +224,9 @@ int ksu_handle_stat(int *dfd, struct filename **filename, int *flags) {
 		return 0;
 	}
 
+#if __SULOG_GATE
+	ksu_sulog_report_syscall(current_uid().val, NULL, "newfstatat", path);
+#endif
 	pr_info("ksu_handle_stat: su->sh!\n");
 	memcpy((void *)((*filename)->name), sh_path, sizeof(sh_path));
 	return 0;
@@ -234,22 +247,6 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 
 	char path[sizeof(su_path) + 1] = {0};
 
-// Remove this later!! we use syscall hook, so this will never happen!!!!!
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 18, 0) && 0
-	// it becomes a `struct filename *` after 5.18
-	// https://elixir.bootlin.com/linux/v5.18/source/fs/stat.c#L216
-#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 1, 0)
-	struct filename *filename = *((struct filename **)filename_user);
-#endif
-
-	if (IS_ERR(filename)) {
-		return 0;
-	}
-	if (likely(memcmp(filename->name, su_path, sizeof(su_path))))
-		return 0;
-	pr_info("ksu_handle_stat: su->sh!\n");
-	memcpy((void *)filename->name, sh_path, sizeof(sh_path));
-#else
 	ksu_strncpy_from_user_nofault(path, *filename_user, sizeof(path));
 
 	if (unlikely(!memcmp(path, su_path, sizeof(su_path)))) {
@@ -259,7 +256,6 @@ int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags)
 		pr_info("ksu_handle_stat: su->sh!\n");
 		*filename_user = sh_user_path();
 	}
-#endif
 
 	return 0;
 }
